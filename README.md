@@ -1,10 +1,10 @@
 <div align="center">
 
-![header](https://readme-typing-svg.demolab.com?font=Fira+Code&size=13&duration=1&pause=999999&color=6366F1&center=true&vCenter=true&repeat=false&width=600&lines=⚡+AI-POWERED+·+TASK+·+QUEUE+⚡)
+![banner](https://img.shields.io/badge/⚡%20AI--POWERED%20·%20TASK%20·%20QUEUE%20⚡-0f0c29?style=for-the-badge&labelColor=0f0c29&color=6366f1)
 
-![title](https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=52&duration=1&pause=999999&color=FFFFFF&center=true&vCenter=true&repeat=false&width=800&lines=TaskQueue+AI)
+# 🧠 TaskQueue AI
 
-![subtitle](https://readme-typing-svg.demolab.com?font=Fira+Code&size=12&duration=1&pause=999999&color=8B5CF6&center=true&vCenter=true&repeat=false&width=700&lines=A+Production-Grade+Multi-Threaded+Task+Queue+System+with+Real-Time+AI+Prioritization)
+### A Production-Grade Multi-Threaded Task Queue System with Real-Time AI Prioritization
 
 <br/>
 
@@ -26,29 +26,9 @@
 
 <br/>
 
-<table>
-<tr>
-<td align="center">
+[![Devanshu](https://img.shields.io/badge/👨‍💻%20Devanshu%20Sharma-Backend%20Engineer%20%26%20Thread%20Pool%20Architect-1d4ed8?style=for-the-badge&logoColor=white)](https://github.com/)
 
-[![Devanshu](https://img.shields.io/badge/-%F0%9F%91%A8%E2%80%8D%F0%9F%92%BB%20Devanshu%20Sharma-1d4ed8?style=for-the-badge&logoColor=white)](https://github.com/)
-
-![role](https://img.shields.io/badge/⚙%20Backend%20Engineer%20%26%20Thread%20Pool%20Architect-0ea5e9?style=flat-square&logoColor=white)
-
-</td>
-<td align="center" width="60">
-
-![and](https://img.shields.io/badge/%26-1e293b?style=for-the-badge)
-
-</td>
-<td align="center">
-
-[![Sanmati](https://img.shields.io/badge/-%F0%9F%91%A9%E2%80%8D%F0%9F%92%BB%20Sanmati%20Jain-7c3aed?style=for-the-badge&logoColor=white)](https://github.com/)
-
-![role](https://img.shields.io/badge/✦%20AI%20Integration%20%26%20Priority%20Engine-8b5cf6?style=flat-square&logoColor=white)
-
-</td>
-</tr>
-</table>
+[![Sanmati](https://img.shields.io/badge/👩‍💻%20Sanmati%20Jain-AI%20Integration%20%26%20Priority%20Engine-7c3aed?style=for-the-badge&logoColor=white)](https://github.com/)
 
 </div>
 
@@ -506,42 +486,14 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-<!-- DevSan footer banner -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 90" width="500">
-  <defs>
-    <linearGradient id="footerBg" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#0f172a"/>
-      <stop offset="100%" style="stop-color:#1e1b4b"/>
-    </linearGradient>
-    <linearGradient id="devGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#3b82f6"/>
-      <stop offset="100%" style="stop-color:#8b5cf6"/>
-    </linearGradient>
-  </defs>
-  <rect width="500" height="90" rx="12" fill="url(#footerBg)"/>
-  <rect width="500" height="90" rx="12" fill="none" stroke="#334155" stroke-width="1"/>
-  <rect x="0" y="0" width="500" height="2.5" rx="1.5" fill="url(#devGrad)"/>
-  <rect x="0" y="87.5" width="500" height="2.5" rx="1.5" fill="url(#devGrad)"/>
+## ⚡ A DevSan Original
 
-  <!-- D circle -->
-  <circle cx="170" cy="45" r="20" fill="#1d4ed8" opacity="0.9"/>
-  <text x="170" y="51" font-family="'Segoe UI',Arial,sans-serif" font-size="16" font-weight="800"
-        fill="white" text-anchor="middle">D</text>
+> *Two engineers. One system. Zero frameworks.*
 
-  <!-- DevSan text -->
-  <text x="250" y="38" font-family="'Segoe UI',Arial,sans-serif" font-size="22" font-weight="900"
-        fill="url(#devGrad)" text-anchor="middle" letter-spacing="1">DevSan</text>
-  <text x="250" y="58" font-family="'Segoe UI',Arial,sans-serif" font-size="10"
-        fill="#64748b" text-anchor="middle" letter-spacing="2">DEVANSHU  ·  SANMATI</text>
+[![DS](https://img.shields.io/badge/DS-Devanshu%20Sharma-1d4ed8?style=for-the-badge&logo=openjdk&logoColor=white)](https://github.com/)
+&nbsp;
+[![SJ](https://img.shields.io/badge/SJ-Sanmati%20Jain-7c3aed?style=for-the-badge&logo=openai&logoColor=white)](https://github.com/)
 
-  <!-- S circle -->
-  <circle cx="330" cy="45" r="20" fill="#6d28d9" opacity="0.9"/>
-  <text x="330" y="51" font-family="'Segoe UI',Arial,sans-serif" font-size="16" font-weight="800"
-        fill="white" text-anchor="middle">S</text>
-</svg>
-
-<br/>
-
-<sub>© 2024 <b>DevSan</b> — Devanshu Sharma & Sanmati Jain. All rights reserved.</sub>
+![](https://img.shields.io/badge/-DevSan%202024%20%C2%A9%20All%20Rights%20Reserved-0f172a?style=flat-square)
 
 </div>
