@@ -1,259 +1,547 @@
-# ⚡ Multi-Threaded Task Queue System with AI Smart Prioritization
+<div align="center">
 
-A custom, multi-threaded Task Queue System built from the ground up in **pure Core Java (Java 17)** with zero external web or concurrency frameworks (NO Spring Boot, NO ExecutorService). 
+![header](https://readme-typing-svg.demolab.com?font=Fira+Code&size=13&duration=1&pause=999999&color=6366F1&center=true&vCenter=true&repeat=false&width=600&lines=⚡+AI-POWERED+·+TASK+·+QUEUE+⚡)
 
-On top of a thread-safe producer-consumer queue sits a **Groq AI prioritization engine**. The AI dynamically reviews task parameters, current queue wait-times, and thread workloads to optimize task order in real-time. It is managed by a beautiful, glassmorphic **Real-Time Web Dashboard** served directly from the native Java HTTP server.
+![title](https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=52&duration=1&pause=999999&color=FFFFFF&center=true&vCenter=true&repeat=false&width=800&lines=TaskQueue+AI)
+
+![subtitle](https://readme-typing-svg.demolab.com?font=Fira+Code&size=12&duration=1&pause=999999&color=8B5CF6&center=true&vCenter=true&repeat=false&width=700&lines=A+Production-Grade+Multi-Threaded+Task+Queue+System+with+Real-Time+AI+Prioritization)
+
+<br/>
+
+[![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/17/)
+[![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)](https://maven.apache.org/)
+[![Groq AI](https://img.shields.io/badge/Groq-AI%20Powered-6B48FF?style=for-the-badge&logo=openai&logoColor=white)](https://groq.com/)
+[![JUnit 5](https://img.shields.io/badge/JUnit-5-25A162?style=for-the-badge&logo=junit5&logoColor=white)](https://junit.org/junit5/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+<br/>
+
+> **Built from scratch. No Spring Boot. No shortcuts. Just raw Java engineering.**
+
+<br/>
 
 ---
 
-## 🏗️ System Architecture
+### 🧑‍💻 Crafted by
 
-```text
-                  +-----------------------------------------+
-                  |            REST API Clients             |
-                  |     (PowerShell Curl / HTML Web UI)      |
-                  +--------------------+--------------------+
-                                       |
-                                POST /api/tasks
-                                       v
-                  +--------------------+--------------------+
-                  |               TaskService               |
-                  |        (In-Memory Store: CHM)           |
-                  +--------------------+--------------------+
-                                       |
-                        Fetch Dynamic Dynamic Priority
-                                       v
-                  +--------------------+--------------------+          +-----------------------+
-                  |      AIPrioritizationService (Groq)     |<-------->|    Groq API           |
-                  |   - Cache (30s Type + Size Signature)   |          | (llama-3.3-70b)       |
-                  |   - Fallback (Deterministic Rules)      |          +-----------------------+
-                  +--------------------+--------------------+
-                                       |
-                             Suggested Priority Applied
-                                       v
-                  +--------------------+--------------------+
-                  |    PriorityBlockingQueue (Max-Heap)     |
-                  +--------------------+--------------------+
-                      |            |            |          |
-                    take()       take()       take()     take()
-                      v            v            v          v
-                  +---+----+   +---+----+   +---+----+   +-+------+
-                  | Worker |   | Worker |   | Worker |   | Worker |  <--- 4 Threads in ThreadPool
-                  |   #1   |   |   #2   |   |   #3   |   |   #4   |       (Built from Scratch!)
-                  +---+----+   +---+----+   +---+----+   +-+------+
-                      |            |            |          |
-                      +------------+----+-------+----------+
-                                        |
-                                        v
-                  +---------------------+-------------------+
-                  |               TaskExecutor              |
-                  |     - Sleep (Simulates Work Type)       |
-                  |     - Failures Trigger Exponential      |
-                  |       Backoff Retries (Timer Task)      |
-                  +-----------------------------------------+
+<br/>
+
+<table>
+<tr>
+<td align="center">
+
+[![Devanshu](https://img.shields.io/badge/-%F0%9F%91%A8%E2%80%8D%F0%9F%92%BB%20Devanshu%20Sharma-1d4ed8?style=for-the-badge&logoColor=white)](https://github.com/)
+
+![role](https://img.shields.io/badge/⚙%20Backend%20Engineer%20%26%20Thread%20Pool%20Architect-0ea5e9?style=flat-square&logoColor=white)
+
+</td>
+<td align="center" width="60">
+
+![and](https://img.shields.io/badge/%26-1e293b?style=for-the-badge)
+
+</td>
+<td align="center">
+
+[![Sanmati](https://img.shields.io/badge/-%F0%9F%91%A9%E2%80%8D%F0%9F%92%BB%20Sanmati%20Jain-7c3aed?style=for-the-badge&logoColor=white)](https://github.com/)
+
+![role](https://img.shields.io/badge/✦%20AI%20Integration%20%26%20Priority%20Engine-8b5cf6?style=flat-square&logoColor=white)
+
+</td>
+</tr>
+</table>
+
+</div>
+
+---
+
+## 📌 What Is This?
+
+**TaskQueue AI** is not just another task scheduler demo. It is a fully functional, production-inspired backend system that combines **deep Java concurrency engineering** with a **live AI brain** that thinks about your tasks before they ever touch the queue.
+
+Every piece of this system — the thread pool, the worker lifecycle, the priority engine, the REST API — was built by hand, using only Core Java. No frameworks. No magic. Pure engineering.
+
+---
+
+## 🚀 What Makes This Stand Out
+
+> *"Anyone can call `Executors.newFixedThreadPool()`. We built what's inside it."*
+
+### ✦ We Built the Thread Pool from Zero
+
+Most Java projects use `ExecutorService` and call it a day. We didn't. We implemented every component from scratch:
+
+- **`WorkerThread.java`** — extends `Thread`, continuously polls a `PriorityBlockingQueue`, handles its own retry logic and backoff delays
+- **`ThreadPool.java`** — manages the lifecycle of N worker threads, tracks active count via `AtomicInteger`, supports graceful shutdown that finishes in-flight tasks before rejecting new ones
+- **No `Executors`, no `ForkJoinPool`, no framework abstractions** — full visibility into every thread at every moment
+
+This is the difference between *using* concurrency primitives and *understanding* them well enough to rebuild them.
+
+---
+
+### ✦ AI That Thinks Before the Queue Does
+
+Before any task enters the queue, it passes through our **`AIPrioritizationService`** — a real-time AI decision engine powered by the Groq API:
+
+- Sends task metadata (type, deadline, payload) + current system state (queue depth, active threads, recent completion rate) to an LLM
+- Receives a structured JSON response: suggested priority (1–10), recommendation (`URGENT` / `NORMAL` / `DEFER`), estimated wait time, warnings
+- Automatically applies the decision — URGENT tasks jump to priority 10 and front of queue; DEFER tasks get flagged with warnings
+- Every decision is logged in an `AIDecisionLog` with full traceability
+
+This is not a UI gimmick. The AI actually changes execution order.
+
+---
+
+### ✦ Smart Enough Not to Burn API Credits
+
+We built a **cost-aware AI layer**:
+
+- AI is called **once per task submission** — never in polling loops
+- Responses are **cached for 30 seconds** per task-type + queue-state combo to avoid duplicate calls
+- Prompts are kept **under 500 tokens** by design
+- If the Groq API is unavailable, the system **falls back to a deterministic rule-based priority engine** so nothing breaks
+- Every API call logs token usage to the console for full credit visibility
+
+---
+
+### ✦ Real Retry Logic with Exponential Backoff
+
+Tasks don't just fail silently. Our execution engine:
+
+- Catches exceptions during task execution
+- Increments `retryCount`, stores the failure reason in the task object
+- Re-queues the task with exponential backoff: delay = 2^retryCount seconds
+- After `maxRetries` (3) attempts, marks the task as `FAILED` permanently
+
+This matches how real production systems handle transient failures.
+
+---
+
+### ✦ Priority-Ordered Execution
+
+The internal queue is a **`PriorityBlockingQueue<Task>`** with a custom comparator. Higher priority tasks always execute first — including when new high-priority tasks arrive while lower-priority ones are waiting. This is not a simple FIFO queue with a label. Priority is structurally enforced.
+
+---
+
+### ✦ Fully Thread-Safe — By Design
+
+Every shared data structure was chosen and synchronized deliberately:
+
+| Component | Thread-Safety Mechanism |
+|---|---|
+| Task storage | `ConcurrentHashMap<UUID, Task>` |
+| Queue | `PriorityBlockingQueue<Task>` |
+| Thread count | `AtomicInteger` |
+| Task status updates | `synchronized` methods |
+| AI decision log | `ConcurrentHashMap` |
+
+No two threads can ever process the same task.
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         CLIENT (Browser)                            │
+│                     Dashboard · REST API Calls                      │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │  HTTP :8080
+┌──────────────────────────────▼──────────────────────────────────────┐
+│                     Java HttpServer (Raw)                           │
+│         TaskHandler · QueueHandler · AIInsightHandler               │
+└──────┬───────────────────────┬───────────────────────┬─────────────┘
+       │                       │                       │
+┌──────▼──────┐    ┌───────────▼────────┐   ┌─────────▼────────────┐
+│ TaskService │    │AIPrioritization    │   │  Queue Stats Engine  │
+│             │    │Service             │   │                      │
+│ CRUD · State│    │Groq API · Cache    │   │ Live metrics · Logs  │
+│ Management  │    │Fallback Rules      │   │                      │
+└──────┬──────┘    └───────────┬────────┘   └──────────────────────┘
+       │                       │
+       └───────────┬───────────┘
+                   │
+┌──────────────────▼───────────────────────────────────────────────┐
+│              PriorityBlockingQueue<Task>                          │
+│         [ P10 ]──[ P9 ]──[ P9 ]──[ P7 ]──[ P5 ]──[ P1 ]        │
+└──────────────────┬───────────────────────────────────────────────┘
+                   │  Poll (blocking)
+┌──────────────────▼───────────────────────────────────────────────┐
+│                   Custom Thread Pool                              │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────┐  │
+│  │ WorkerThread│ │ WorkerThread│ │ WorkerThread│ │WorkerThread│  │
+│  │    #1 BUSY  │ │    #2 BUSY  │ │   #3 IDLE   │ │  #4 BUSY  │  │
+│  └──────┬──────┘ └──────┬──────┘ └─────────────┘ └─────┬─────┘  │
+└─────────│───────────────│──────────────────────────────│─────────┘
+          │               │                              │
+┌─────────▼───────────────▼──────────────────────────────▼─────────┐
+│                     TaskExecutor                                  │
+│   EMAIL(1-2s) · PAYMENT(2-3s) · REPORT(3-5s) · NOTIFY(0.5-1s)   │
+│                     DATA_SYNC(2-4s)                               │
+│              Retry → Exponential Backoff → FAILED                 │
+└───────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🌟 Standout Core Features
+## 📁 Project Structure
 
-1. **Custom Thread Pool (`ThreadPool` / `WorkerThread`)**: Built entirely from scratch by extending `java.lang.Thread` and polling a shared priority queue. No standard Java `Executors` are used.
-2. **AI-Powered Smart Prioritization (`AIPrioritizationService`)**: Connects to the Groq chat completions API using standard built-in `HttpClient` to review queue capacity and deadline pressures, automatically adjusting execution priorities (e.g., overriding to priority 10 for urgent payments, or deferring slow data syncs to priority 1).
-3. **Graceful Failures & Fallbacks**:
-   - **Caching Layer**: Prevents rate-limits and token costs by caching AI prioritization decisions for 30 seconds using task type + queue signatures.
-  - **Deterministic Fallbacks**: If the Groq API key is absent or the network drops, it immediately implements a hardcoded priority fallback schema (`PAYMENT=9`, `REPORT=7`, `EMAIL=5`, `NOTIFICATION=3`, `DATA_SYNC=2`) to guarantee 100% service uptime.
-4. **Exponential Backoff Retries**: Tasks that throw execution exceptions (e.g., intermittent connections) increment their retry counter, wait an exponentially increasing period ($2^{\text{retryCount}}$ seconds), and are re-submitted to the queue thread-safely via a background `Timer`.
-5. **Interactive Glassmorphic Dashboard**: A deep-slate dark mode web dashboard served directly at `http://localhost:8080/` with a live 1.5s refresh cycle, tracking active workers, queue lengths, task status logs, and a scrolling window of real-time AI decision rationales.
+```
+queue-system/
+├── pom.xml
+├── README.md
+└── src/
+    └── main/
+        └── java/
+            └── com/taskqueue/
+                ├── Main.java                          ← Entry point + sample data loader
+                ├── server/
+                │   └── TaskQueueServer.java           ← Raw Java HttpServer on :8080
+                ├── handlers/
+                │   ├── TaskHandler.java               ← POST/GET/DELETE /api/tasks
+                │   ├── QueueHandler.java              ← GET /api/queue/stats
+                │   └── AIInsightHandler.java          ← GET /api/tasks/ai-insights
+                ├── services/
+                │   ├── TaskService.java               ← Core CRUD + state management
+                │   ├── TaskExecutor.java              ← Simulated execution + retry
+                │   └── AIPrioritizationService.java  ← Groq API + caching + fallback
+                ├── threadpool/
+                │   ├── ThreadPool.java                ← Custom thread pool manager
+                │   └── WorkerThread.java              ← Custom worker thread
+                ├── models/
+                │   ├── Task.java                      ← Full task model with all states
+                │   ├── TaskType.java                  ← EMAIL/REPORT/PAYMENT/NOTIFY/SYNC
+                │   ├── TaskStatus.java                ← PENDING/RUNNING/COMPLETED/FAILED
+                │   └── AIDecisionLog.java             ← Full AI decision audit record
+                ├── exceptions/
+                │   ├── TaskQueueException.java        ← Base exception
+                │   ├── TaskNotFoundException.java
+                │   ├── QueueFullException.java
+                │   ├── TaskExecutionException.java
+                │   ├── InvalidTaskException.java
+                │   └── ThreadPoolShutdownException.java
+                └── utils/
+                    ├── JsonUtils.java                 ← JSON marshalling helpers
+                    └── ApiConfig.java                 ← API key from environment
+```
 
 ---
 
-## 🛠️ Getting Started & Setup
+## 🔌 API Reference
 
-### 1. Retrieve Your Free Groq API Key (Highly Recommended)
-- Go to the [Groq Console](https://console.groq.com/keys).
-- Sign up and create a new key.
-- Navigate to the **API Keys** section and generate a new key.
-- *Note: If you choose not to configure a key, the system will run perfectly using the built-in static priority fallbacks!*
+### Tasks
 
-### 2. Configure Your API Key
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/tasks` | Submit a new task (triggers AI prioritization) |
+| `GET` | `/api/tasks` | List all tasks |
+| `GET` | `/api/tasks/{id}` | Get a task by ID |
+| `DELETE` | `/api/tasks/{id}` | Cancel a pending or running task |
+| `GET` | `/api/tasks/status/{status}` | Filter tasks by status |
+| `POST` | `/api/tasks/prioritize` | Run AI priority check on a task description |
+| `GET` | `/api/tasks/ai-insights` | Retrieve full AI decision log |
 
-**Option A — Web dashboard (easiest)**  
-1. Start the server and open http://localhost:8080/  
-2. Click **API Key Settings**  
-3. Paste your key from [console.groq.com/keys](https://console.groq.com/keys) (starts with `gsk_`)  
-4. Click **Validate key**, then **Save & use**
+### Queue
 
-**Option B — Environment variable**  
-Set the key in your shell before launching:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/queue/stats` | Full dashboard stats snapshot |
 
-#### For Windows PowerShell (Recommended):
-```powershell
-$env:GROQ_API_KEY="your_actual_api_key_here"
-```
+---
 
-#### For Windows CMD (Command Prompt):
-```cmd
-set GROQ_API_KEY=your_actual_api_key_here
-```
+### Example: Submit a Task
 
-#### For Linux / macOS Terminal:
 ```bash
-export GROQ_API_KEY="your_actual_api_key_here"
+curl -X POST http://localhost:8080/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Payment Reconciliation",
+    "type": "PAYMENT",
+    "payload": "{\"batch\": \"Q4-2024\"}",
+    "deadline": "2024-12-31T23:59:59"
+  }'
+```
+
+**Response:**
+```json
+{
+  "taskId": "a3f8e2d1-...",
+  "name": "Payment Reconciliation",
+  "type": "PAYMENT",
+  "priority": 9,
+  "status": "PENDING",
+  "aiDecision": {
+    "suggestedPriority": 9,
+    "reasoning": "Payment tasks near deadline require immediate execution to avoid SLA breach.",
+    "recommendation": "URGENT",
+    "estimatedWaitTime": 4,
+    "warnings": []
+  }
+}
 ```
 
 ---
 
-## 🚀 Building & Running the Project
+### Example: Queue Stats
 
-The project is structured with standard Maven and compiles directly using a clean, standard shade configuration.
+```bash
+curl http://localhost:8080/api/queue/stats
+```
 
-### Step 1: Clean and Package the JAR
-Use the Maven wrapper (or your global Maven command) to compile and build the package:
+```json
+{
+  "totalTasks": 42,
+  "pendingTasks": 8,
+  "runningTasks": 4,
+  "completedTasks": 28,
+  "failedTasks": 2,
+  "cancelledTasks": 0,
+  "activeThreads": 4,
+  "queueSize": 8,
+  "avgCompletionTimeSeconds": 2.4,
+  "tasksByType": {
+    "PAYMENT": 12,
+    "EMAIL": 15,
+    "REPORT": 8,
+    "NOTIFICATION": 5,
+    "DATA_SYNC": 2
+  },
+  "aiDecisionsMade": 42,
+  "aiUrgentOverrides": 7
+}
+```
+
+---
+
+### Example: AI Prioritize
+
+```bash
+curl -X POST http://localhost:8080/api/tasks/prioritize \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Database Backup",
+    "type": "DATA_SYNC",
+    "deadline": "2024-12-30T06:00:00"
+  }'
+```
+
+```json
+{
+  "suggestedPriority": 6,
+  "reasoning": "Backup task with 12hr deadline; moderate urgency given current queue load.",
+  "recommendation": "NORMAL",
+  "estimatedWaitTime": 45,
+  "queuePosition": 3,
+  "warnings": ["High queue depth detected — estimated wait may increase"]
+}
+```
+
+---
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+
+- Java 17+
+- Maven 3.8+
+- A free Groq API key → [console.groq.com](https://console.groq.com)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-org/taskqueue-ai.git
+cd taskqueue-ai/queue-system
+```
+
+### 2. Set Your API Key
+
+**Linux / macOS:**
+```bash
+export GROQ_API_KEY=your_key_here
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:GROQ_API_KEY="your_key_here"
+```
+
+> Your API key is never hardcoded anywhere in the source. It is read exclusively from the environment variable `GROQ_API_KEY` via `ApiConfig.java`.
+
+### 3. Build
+
 ```bash
 mvn clean package
 ```
 
-### Step 2: Run the Executable
-Start the standalone shaded JAR:
+### 4. Run
+
 ```bash
-java -jar target/queue-system-1.0-SNAPSHOT.jar
+java -jar target/taskqueue-ai-1.0.jar
 ```
 
-On startup, you will see a glowing custom ASCII banner and console messages as the thread pool initializes. **No sample tasks are pre-loaded** — submit tasks via the dashboard or API.
+The server starts on **http://localhost:8080** and automatically loads 5 sample tasks across all types so the queue is live immediately.
+
+### 5. Open the Dashboard
+
+Navigate to **http://localhost:8080** in your browser to open the real-time web dashboard.
 
 ---
 
-## 📈 Estimated API Credit Usage & Cost Metrics
+## 🧪 Running Tests
 
-The dynamic prioritization system is highly optimized to protect your free credits:
-- **Groq Model**: `llama-3.3-70b-versatile`
-- **Cost Rates**: check the current Groq pricing dashboard
-- **Input Prompt size**: ~380 tokens (compact and instruction-focused)
-- **Output response size**: ~95 tokens (highly structured JSON payload)
-- **Calculated Cost per Task**: depends on current Groq pricing and token usage
-- **Cost Value**: depends on your account credits and model pricing
-- **30-Second Caching**: Limits duplicate calls for similar workloads.
+```bash
+mvn test
+```
+
+Tests cover task lifecycle, thread pool behavior, retry logic, priority ordering, and API endpoint responses using **JUnit 5**.
 
 ---
 
-## 📡 REST API Endpoint Documentation
+## 🧠 AI Prioritization — How It Works
 
-Here are operational `curl` commands for testing the application via terminal or PowerShell:
-
-### 1. Submit a New Task (Triggers AI Prioritization)
-Submits a task context, which the AI analyzes to assign a dynamic priority:
-```bash
-curl -X POST http://localhost:8080/api/tasks \
-     -H "Content-Type: application/json" \
-     -d '{"name": "Invoice Billing Process", "type": "PAYMENT", "payload": "amount=$4500, region=EU", "priority": 5, "deadlineSeconds": 90}'
 ```
-*PowerShell Equivalent:*
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/api/tasks" -Method Post -ContentType "application/json" -Body '{"name": "Invoice Billing Process", "type": "PAYMENT", "payload": "amount=$4500, region=EU", "priority": 5, "deadlineSeconds": 90}'
-```
-
-### 2. List All Active Tasks
-Retrieves a JSON list of all tasks, their statuses, times, and AI priority reasoning:
-```bash
-curl http://localhost:8080/api/tasks
-```
-
-### 3. Retrieve Task Details by ID
-```bash
-curl http://localhost:8080/api/tasks/8fa24c96-3b68-4ad0-b88a-36fb1c49bf9b
-```
-
-### 4. Cancel a Pending or Active Task
-Marks a task as `CANCELLED` and safely removes it from the Priority Queue:
-```bash
-curl -X DELETE http://localhost:8080/api/tasks/8fa24c96-3b68-4ad0-b88a-36fb1c49bf9b
-```
-
-### 5. Filter Tasks by Status
-Allowed values: `PENDING`, `RUNNING`, `COMPLETED`, `FAILED`, `CANCELLED`.
-```bash
-curl http://localhost:8080/api/tasks/status/PENDING
-```
-*PowerShell:*
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/api/tasks/status/RUNNING"
-```
-
-### 6. Get Real-Time Queue Statistics
-```bash
-curl http://localhost:8080/api/queue/stats
-```
-Example response:
-```json
-{
-  "totalTasks": 5,
-  "pendingTasks": 1,
-  "runningTasks": 2,
-  "completedTasks": 2,
-  "failedTasks": 0,
-  "cancelledTasks": 0,
-  "activeThreads": 2,
-  "queueSize": 1,
-  "avgCompletionTimeSeconds": 2.14,
-  "tasksByType": { "PAYMENT": 1, "EMAIL": 1 },
-  "aiDecisionsMade": 5,
-  "aiUrgentOverrides": 0
-}
-```
-
-### 7. AI Priority Check (preview or re-prioritize)
-Preview priority for a hypothetical task (not enqueued):
-```bash
-curl -X POST http://localhost:8080/api/tasks/prioritize \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Hypothetical Payment", "type": "PAYMENT", "payload": "amount=1200", "priority": 5, "deadlineSeconds": 90}'
-```
-Re-prioritize an existing pending task:
-```bash
-curl -X POST http://localhost:8080/api/tasks/prioritize \
-  -H "Content-Type: application/json" \
-  -d '{"taskId": "YOUR-TASK-UUID-HERE"}'
-```
-
-### 8. Retrieve AI Prioritization Log Decisions
-```bash
-curl http://localhost:8080/api/tasks/ai-insights
-```
-
-### 9. API Key Configuration (dashboard backend)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/config/ai` | Key status (`active`/`inactive`), source, partial hint |
-| POST | `/api/config/api-key` | Set runtime key: `{"api_key":"gsk_..."}` |
-| POST | `/api/config/api-key/validate` | Test key against Groq chat completions API |
-| DELETE | `/api/config/api-key` | Clear runtime key (falls back to env) |
-
-```bash
-curl http://localhost:8080/api/config/ai
-
-curl -X POST http://localhost:8080/api/config/api-key \
-  -H "Content-Type: application/json" \
-  -d '{"api_key":"gsk_YOUR_KEY"}'
-
-curl -X POST http://localhost:8080/api/config/api-key/validate \
-  -H "Content-Type: application/json" \
-  -d '{"api_key":"gsk_YOUR_KEY"}'
+New Task Submitted
+       │
+       ▼
+┌─────────────────────────────────────────┐
+│         Cache Check (30s window)        │
+│  Same task type + queue state? → Reuse  │
+└──────────────────┬──────────────────────┘
+                   │ Miss
+                   ▼
+┌─────────────────────────────────────────┐
+│           Build Prompt                  │
+│  Task: { type, deadline, payload }      │
+│  Queue: { depth, types, priorities }    │
+│  System: { activeThreads, completion/m }│
+│  < 500 tokens, strict JSON output       │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+         ┌─────────────────┐
+         │    Groq API     │
+         └────────┬────────┘
+    ┌─────────────┴───────────────┐
+    │ Success                     │ Failure
+    ▼                             ▼
+Apply AI decision          Rule-based fallback:
+  URGENT → P10             PAYMENT=9, REPORT=7
+  NORMAL → as-is           EMAIL=5, NOTIFY=3
+  DEFER  → P1 + warn       DATA_SYNC=2
+    │
+    ▼
+Log to AIDecisionLog
+(decisionId, taskId, reasoning,
+ originalPriority, suggestedPriority,
+ recommendation, timestamp)
 ```
 
 ---
 
-## 🛠️ Testing Retries
+## 📊 Dashboard Features
 
-Submit a task whose payload contains `fail` or `error` to trigger simulated failures and exponential backoff retries (`2^retryCount` seconds between attempts, max 3 retries).
+The built-in web dashboard (served at `/`) provides:
+
+- **Live stat cards** — total, pending, running, completed, failed, AI decisions (auto-refresh every 3s)
+- **Queue Activity chart** — visual throughput over time
+- **Tasks by Type** — animated donut chart
+- **Active Threads panel** — per-worker status, current task, progress percentage
+- **Task Registry** — full table with priority bars, animated status badges, cancel buttons
+- **Queue Monitor** — real-time thread lane visualization + system log
+- **AI Insights page** — decision log, on-demand AI analysis, reasoning display
+- **Theme switcher** — Default and Obsidian themes
 
 ---
 
-## 🎯 What Makes This Interview-Ready?
+## 🧩 Tech Stack
 
-When an interviewer asks: *"What is unique or challenging about this project?"*
+| Layer | Technology |
+|-------|-----------|
+| Language | Java 17 |
+| Build | Maven |
+| HTTP Server | `com.sun.net.httpserver.HttpServer` (raw, no framework) |
+| Concurrency | Custom `ThreadPool` + `WorkerThread` (no `Executors`) |
+| Queue | `PriorityBlockingQueue<Task>` |
+| Storage | `ConcurrentHashMap` (in-memory, no database) |
+| AI | Groq API (LLM inference) via Java `HttpClient` |
+| JSON | `org.json` |
+| Frontend | Vanilla HTML, CSS, JavaScript |
+| Testing | JUnit 5 |
 
-You can confidently say:
-> "I built a custom multithreaded task queue system from scratch in Core Java, implementing the Producer-Consumer pattern using a PriorityBlockingQueue and custom worker threads instead of built-in executors. 
-> To solve real-world scheduling bottlenecks, I integrated Groq AI using Java's HttpClient. Before enqueuing tasks, the AI dynamically analyzes queue capacity, worker threads, and deadlines, overriding priorities as needed. 
-> To make it production-ready, I built a 30-second token caching system, created a robust deterministic fallback schema on network failure, implemented timed exponential backoff retries, and designed a glassmorphic dashboard to monitor stats in real-time."
+---
+
+## 🏆 Key Differentiators at a Glance
+
+| Feature | Typical Demo App | TaskQueue AI |
+|---------|-----------------|--------------|
+| Thread pool | `Executors.newFixedThreadPool()` | Built from scratch with `Thread` |
+| Priority queue | FIFO or basic sorting | `PriorityBlockingQueue` + AI override |
+| AI integration | None or UI-only | Changes actual execution order |
+| Failure handling | None | Retry + exponential backoff + FAILED state |
+| API cost control | N/A | Caching + token budgeting + fallback |
+| Thread safety | Assumed | `AtomicInteger` + `synchronized` + `ConcurrentHashMap` |
+| Shutdown | Kill process | Graceful: finish running tasks, reject new |
+| Observability | None | Per-thread status, AI decision log, full stats |
+
+---
+
+## 📬 Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | Yes | Your Groq API key for AI prioritization |
+
+---
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Built with raw Java and a genuine love for systems programming.**
+
+*No frameworks were harmed in the making of this project.*
+
+---
+
+<!-- DevSan footer banner -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 90" width="500">
+  <defs>
+    <linearGradient id="footerBg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="devGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect width="500" height="90" rx="12" fill="url(#footerBg)"/>
+  <rect width="500" height="90" rx="12" fill="none" stroke="#334155" stroke-width="1"/>
+  <rect x="0" y="0" width="500" height="2.5" rx="1.5" fill="url(#devGrad)"/>
+  <rect x="0" y="87.5" width="500" height="2.5" rx="1.5" fill="url(#devGrad)"/>
+
+  <!-- D circle -->
+  <circle cx="170" cy="45" r="20" fill="#1d4ed8" opacity="0.9"/>
+  <text x="170" y="51" font-family="'Segoe UI',Arial,sans-serif" font-size="16" font-weight="800"
+        fill="white" text-anchor="middle">D</text>
+
+  <!-- DevSan text -->
+  <text x="250" y="38" font-family="'Segoe UI',Arial,sans-serif" font-size="22" font-weight="900"
+        fill="url(#devGrad)" text-anchor="middle" letter-spacing="1">DevSan</text>
+  <text x="250" y="58" font-family="'Segoe UI',Arial,sans-serif" font-size="10"
+        fill="#64748b" text-anchor="middle" letter-spacing="2">DEVANSHU  ·  SANMATI</text>
+
+  <!-- S circle -->
+  <circle cx="330" cy="45" r="20" fill="#6d28d9" opacity="0.9"/>
+  <text x="330" y="51" font-family="'Segoe UI',Arial,sans-serif" font-size="16" font-weight="800"
+        fill="white" text-anchor="middle">S</text>
+</svg>
+
+<br/>
+
+<sub>© 2024 <b>DevSan</b> — Devanshu Sharma & Sanmati Jain. All rights reserved.</sub>
+
+</div>
