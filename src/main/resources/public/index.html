@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskQueue AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand"><span class="brand-icon">⚡</span>TaskQueue <span>AI</span></div>
+      <div class="sidebar-node" style="margin-top:10px">
+        <div class="node-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        </div>
+        <div class="node-text">
+          <div class="node-name">System Node</div>
+          <div class="node-ver" id="app-subtitle">v2.4.0-stable</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="new-task-btn" onclick="openPanel()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Task
+    </button>
+
+    <nav class="nav-section">
+      <div class="nav-item active" onclick="setPage('dashboard', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="setPage('tasks', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        Tasks
+      </div>
+      <div class="nav-item" onclick="setPage('queue', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Queue Monitor
+      </div>
+      <div class="nav-item" onclick="setPage('insights', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        AI Insights
+      </div>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="nav-item" id="btn-open-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.9 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        API Key Settings
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-nav">
+        <div class="topbar-tab active" id="tab-dashboard" onclick="setPage('dashboard')">Dashboard</div>
+        <div class="topbar-tab" id="tab-tasks" onclick="setPage('tasks')">Tasks</div>
+        <div class="topbar-tab" id="tab-queue" onclick="setPage('queue')">Queue Monitor</div>
+        <div class="topbar-tab" id="tab-insights" onclick="setPage('insights')">AI Insights</div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="quick-search" placeholder="Quick search..." oninput="handleQuickSearch(this.value)">
+        </div>
+
+        <!-- THEME SWITCHER -->
+        <div class="theme-switcher">
+          <button class="theme-btn" id="theme-btn">
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.03456 19.176 5.28186 19.2618 5.5292 19.2319C6.54134 19.1097 7.51465 18.6653 8.27218 17.9622C8.84777 17.4281 9.60533 17.1264 10.3957 17.1264H11.5C11.7761 17.1264 12 17.3503 12 17.6264V22Z" />
+              <circle cx="7.5" cy="10.5" r="1" fill="currentColor"/>
+              <circle cx="11.5" cy="7.5" r="1" fill="currentColor"/>
+              <circle cx="16.5" cy="9.5" r="1" fill="currentColor"/>
+              <circle cx="15.5" cy="14.5" r="1" fill="currentColor"/>
+            </svg>
+            <span>Theme</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <button class="theme-option" data-theme="default">
+              <span class="swatch default-swatch"></span>
+              <span>Default</span>
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="theme-option active" data-theme="obsidian">
+              <span class="swatch obsidian-swatch"></span>
+              <span>Obsidian</span>
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="api-key-badge" class="ai-badge">
+          <div class="ai-badge-dot"></div>
+          <span id="api-badge-text">AI Prioritization: ON</span>
+        </div>
+        <div class="avatar">T</div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div style="display:flex;flex:1;overflow:hidden">
+      <div class="content" style="flex:1">
+
+        <!-- BILLING BANNER -->
+        <div id="billing-banner" class="billing-banner" hidden></div>
+
+        <!-- DASHBOARD PAGE -->
+        <div class="page active" id="page-dashboard">
+          <div class="stats-row" id="stats-row">
+            <!-- Dynamic Stats Cards -->
+          </div>
+
+          <div class="charts-row">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg style="width:14px;height:14px;color:var(--blue2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                  Queue Activity (Live)
+                </div>
+              </div>
+              <div style="padding:12px" class="chart-placeholder">
+                <svg class="wave-svg" viewBox="0 0 600 130" preserveAspectRatio="none" id="activity-chart">
+                  <defs>
+                    <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#3b82f6" stop-opacity=".3"/>
+                      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <path id="chart-path-bg" d="M0,130 L600,130 Z" fill="url(#wg)"/>
+                  <path id="chart-path" d="" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                </svg>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg style="width:14px;height:14px;color:var(--purple2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  Tasks by Type
+                </div>
+              </div>
+              <div style="padding:12px" class="chart-placeholder">
+                <div class="donut-wrap">
+                  <div class="donut-center">
+                    <svg width="90" height="90" viewBox="0 0 90 90" id="donut-svg">
+                      <circle cx="45" cy="45" r="35" fill="none" stroke="#1e2d45" stroke-width="10"/>
+                      <!-- Dynamic circles will be injected here -->
+                    </svg>
+                    <div class="donut-label-center">
+                      <div class="donut-center-num" id="donut-total">0</div>
+                      <div class="donut-center-sub">Total</div>
+                    </div>
+                  </div>
+                  <div class="donut-legend" id="donut-legend">
+                    <!-- Dynamic legend items -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg style="width:14px;height:14px;color:var(--green2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="4" height="10"/><rect x="10" y="4" width="4" height="13"/><rect x="18" y="2" width="4" height="15"/></svg>
+                Active Worker Threads
+              </div>
+              <div style="font-size:12px;color:var(--blue2);cursor:pointer" onclick="setPage('queue')">View Details &rsaquo;</div>
+            </div>
+            <div style="padding:12px">
+              <div class="threads-grid" id="threads-grid">
+                <!-- Dynamic active threads -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TASKS PAGE -->
+        <div class="page" id="page-tasks">
+          <div class="page-header">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div class="page-title">Task Registry</div>
+                <div class="page-sub">Manage and orchestrate automated system workloads.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tasks-stats" id="tasks-stats-row">
+            <!-- Dynamic sub stats -->
+          </div>
+
+          <div class="filter-row">
+            <div class="filter-tabs" id="filter-tabs-container">
+              <div class="filter-tab active" onclick="setFilterStatus('all', this)">All</div>
+              <div class="filter-tab" onclick="setFilterStatus('running', this)">Running</div>
+              <div class="filter-tab" onclick="setFilterStatus('pending', this)">Pending</div>
+              <div class="filter-tab" onclick="setFilterStatus('completed', this)">Completed</div>
+              <div class="filter-tab" onclick="setFilterStatus('failed', this)">Failed</div>
+            </div>
+            <button class="submit-btn" onclick="openPanel()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Submit Task
+            </button>
+          </div>
+
+          <div class="card" style="overflow-x:auto;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Task Name</th>
+                  <th>Type</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Retries</th>
+                  <th>Created/Completed</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tasks-table-body">
+                <!-- Dynamic tasks list -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- QUEUE MONITOR PAGE -->
+        <div class="page" id="page-queue">
+          <div class="qm-layout">
+            <div class="card" style="display:flex;flex-direction:column;">
+              <div class="card-header">
+                <div class="card-title">Pending Task Queue</div>
+                <span class="queue-count" id="queue-depth-badge">0 depth</span>
+              </div>
+              <div style="padding:12px;flex:1;">
+                <div class="queue-list" id="queue-list-container">
+                  <!-- Dynamic pending queue list -->
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="pool-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                  Thread Pool Status
+                </div>
+                <div class="cpu-pill" id="cpu-pill">CPU 0%</div>
+              </div>
+              <div style="padding:12px" class="thread-pool-section" id="thread-pool-lanes">
+                <!-- Dynamic thread pool lanes -->
+              </div>
+            </div>
+          </div>
+
+          <div class="qm-bottom" id="qm-bottom-stats">
+            <!-- Dynamic stats columns -->
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div class="card-header">
+              <div class="card-title">System Execution Logs</div>
+            </div>
+            <div class="sys-log" id="sys-log">
+              <!-- Live stdout execution logs -->
+            </div>
+          </div>
+        </div>
+
+        <!-- AI INSIGHTS PAGE -->
+        <div class="page" id="page-insights">
+          <div class="ai-layout">
+            <div class="request-box">
+              <div class="request-title">
+                <svg style="width:16px;height:16px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                AI Priority Analyzer Preview
+              </div>
+              <p class="hint">Test how the AI Prioritization rules optimize a hypothetical task payload without submitting it to the queue.</p>
+              
+              <form id="ai-preview-form" onsubmit="event.preventDefault(); runAiPreview();">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                  <div class="form-group">
+                    <label class="form-label" for="preview-name">Task Name</label>
+                    <input type="text" id="preview-name" class="form-input" placeholder="e.g. Sync Transactions" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="preview-type">Task Type</label>
+                    <select id="preview-type" class="form-input" required></select>
+                  </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label class="form-label" for="preview-payload">Payload data</label>
+                  <textarea id="preview-payload" class="form-input form-textarea" placeholder="e.g. database=production account_id=482937" required></textarea>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                  <div class="form-group">
+                    <label class="form-label" id="label-preview-priority">Base Priority (5)</label>
+                    <input type="range" id="preview-priority" class="form-slider" min="1" max="10" value="5" oninput="$('#label-preview-priority').textContent='Base Priority ('+this.value+')'">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" id="label-preview-deadline">Deadline (3600s)</label>
+                    <input type="range" id="preview-deadline" class="form-slider" min="30" max="7200" step="30" value="3600" oninput="$('#label-preview-deadline').textContent='Deadline ('+this.value+'s)'">
+                  </div>
+                </div>
+
+                <div class="ai-footer-row">
+                  <div class="ai-tags">
+                    <div class="ai-tag">LLaMA 3.3</div>
+                    <div class="ai-tag">70B</div>
+                  </div>
+                  <button type="submit" class="analyze-btn" id="btn-preview-ai">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Analyze Payload
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div class="score-card">
+                <div class="score-label">AI DECISIONS COUNT</div>
+                <div class="score-value" id="ai-decisions-made-value">0</div>
+                <div class="score-badge critical" id="ai-overrides-badge">0 URGENT OVERRIDES</div>
+              </div>
+              <div class="reasoning-card" id="ai-preview-result-card" hidden>
+                <div class="reasoning-title">
+                  <svg style="width:12px;height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+                  Preview Decision Results
+                </div>
+                <pre class="code-block" id="ai-preview-code-block" style="margin-top:5px;max-height:160px;overflow:auto;"></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="ai-log-title" style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--purple2)">
+                <svg style="width:16px;height:16px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Groq AI Decision Log
+              </div>
+              <button class="export-btn" onclick="exportLogs()">Export JSON</button>
+            </div>
+            <div class="ai-logs" id="ai-logs" style="padding:12px;">
+              <!-- Decision list cards -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ACTIVITY FEED -->
+      <aside class="activity-panel">
+        <div class="activity-header">Activity Feed</div>
+        <div class="activity-list" id="activity-feed-list">
+          <!-- Dynamic logs/notifs -->
+        </div>
+        <div class="node-health">
+          <div class="health-label">Node Health <span class="health-good">GOOD</span></div>
+          
+          <div class="health-bar-row">
+            <div class="health-bar-label"><span>Queue Availability</span><span id="queue-avail-pct">100%</span></div>
+            <div class="health-bar"><div class="health-bar-fill" style="background:var(--blue);width:100%" id="queue-avail-bar"></div></div>
+          </div>
+          <div class="health-bar-row">
+            <div class="health-bar-label"><span>Thread Utilization</span><span id="thread-util-pct">0%</span></div>
+            <div class="health-bar"><div class="health-bar-fill" style="background:var(--green);width:0%" id="thread-util-bar"></div></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- SLIDE PANEL (New Task Form) -->
+  <div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+  <aside class="slide-panel" id="slide-panel">
+    <header class="panel-header">
+      <h2 class="panel-title">Submit New Task</h2>
+      <button class="panel-close" onclick="closePanel()">&times;</button>
+    </header>
+    <div class="panel-body">
+      <form id="task-form" class="form" onsubmit="submitTaskForm(event)">
+        <div class="form-group">
+          <label class="form-label" for="task-name">Task Name</label>
+          <input type="text" id="task-name" class="form-input" placeholder="e.g. Sync Transactions" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="task-type">Task Type</label>
+          <select id="task-type" class="form-input" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-payload">Payload Data</label>
+          <input type="text" id="task-payload" class="form-input" placeholder="e.g. account_id=4920" required>
+        </div>
+
+        <div class="form-group">
+          <div class="slider-val" id="val-task-priority">5</div>
+          <label class="form-label" id="label-task-priority">Base Priority</label>
+          <div class="slider-wrap">
+            <input type="range" id="task-priority" class="form-slider" min="1" max="10" value="5" oninput="$('#val-task-priority').textContent=this.value">
+          </div>
+          <div class="slider-labels">
+            <span>LOW (1)</span>
+            <span>HIGH (10)</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="slider-val" id="val-task-deadline">3600s</div>
+          <label class="form-label" id="label-task-deadline">Deadline (seconds)</label>
+          <div class="slider-wrap">
+            <input type="range" id="task-deadline" class="form-slider" min="30" max="7200" step="30" value="3600" oninput="$('#val-task-deadline').textContent=this.value+'s'">
+          </div>
+          <div class="slider-labels">
+            <span>30s</span>
+            <span>2h</span>
+          </div>
+        </div>
+
+        <div id="form-alert" class="alert" hidden></div>
+        
+        <div class="panel-footer" style="padding: 16px 0 0;">
+          <button type="submit" class="panel-submit" id="btn-submit-task">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Enqueue with AI Priority
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  <!-- SETTINGS MODAL -->
+  <dialog id="settings-modal" class="modal">
+    <div class="modal-inner">
+      <header class="modal-header">
+        <h2 id="settings-title">Configure Groq API Key</h2>
+        <button class="btn-close" id="btn-close-settings" onclick="$('#settings-modal').close()">&times;</button>
+      </header>
+
+      <p class="modal-desc" id="settings-desc">
+        Configure your credentials to enable real-time llama-3.3-70b-versatile prioritization.
+      </p>
+
+      <div id="key-status-card" class="key-status-card">
+        <div class="key-status-row">
+          <span class="key-status-label" id="label-key-status">Status:</span>
+          <span id="key-status-value" class="key-status-pill"></span>
+        </div>
+        <div class="key-status-row">
+          <span class="key-status-label" id="label-key-source">Source:</span>
+          <span id="key-source-value"></span>
+        </div>
+        <div class="key-status-row">
+          <span class="key-status-label" id="label-key-hint">Hint:</span>
+          <code id="key-hint-value" class="mono"></code>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" id="label-api-key-input" for="api-key-input">API Key</label>
+        <input type="password" id="api-key-input" class="form-input" autocomplete="off" placeholder="Paste Groq API key">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn--secondary" id="btn-validate-key" onclick="validateKey()">Validate Key</button>
+        <button type="button" class="btn btn--primary" id="btn-save-key" onclick="saveKey()">Save & Use</button>
+        <button type="button" class="btn btn--ghost" id="btn-clear-key" onclick="clearKey()">Clear Runtime Key</button>
+      </div>
+      <p id="settings-message" class="settings-message" hidden></p>
+    </div>
+  </dialog>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
