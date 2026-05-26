@@ -56,7 +56,6 @@ public class TaskService {
         validateTaskParams(name, type, payload, deadline, basePriority);
 
         Task task = new Task(name, type, payload, deadline, basePriority);
-        taskStore.put(task.getTaskId(), task);
 
         // Run AI prioritization inside a synchronized lock to capture a consistent queue state snapshot
         double completedRate = getRecentCompletionRate();
@@ -65,8 +64,14 @@ public class TaskService {
 
         aiService.prioritizeTask(task, queueSize, activeThreads, completedRate);
 
-        // Enqueue prioritized task
-        threadPool.submit(task);
+        try {
+            // Enqueue prioritized task before making it visible in the store.
+            threadPool.submit(task);
+            taskStore.put(task.getTaskId(), task);
+        } catch (QueueFullException | ThreadPoolShutdownException e) {
+            task.setFailureReason(e.getMessage());
+            throw e;
+        }
         return task;
     }
 

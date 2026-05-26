@@ -52,6 +52,14 @@ public class TaskExecutor {
             // Simulate work
             Thread.sleep(sleepDurationMs);
 
+            synchronized (task) {
+                if (task.getStatus() == TaskStatus.CANCELLED) {
+                    task.setCompletedAt(Instant.now());
+                    System.out.println("[Task Executor] Task cancelled during execution: '" + task.getName() + "'");
+                    return;
+                }
+            }
+
             // Simulate execution errors to test the retry mechanism:
             // Fail if payload contains "fail", "error", or randomly (5% chance)
             String payloadLower = task.getPayload().toLowerCase();
@@ -79,6 +87,13 @@ public class TaskExecutor {
     }
 
     private void handleFailure(Task task, String errorMsg) {
+        synchronized (task) {
+            if (task.getStatus() == TaskStatus.CANCELLED) {
+                task.setCompletedAt(Instant.now());
+                return;
+            }
+        }
+
         task.incrementRetryCount();
         task.setFailureReason(errorMsg);
         int currentRetry = task.getRetryCount();

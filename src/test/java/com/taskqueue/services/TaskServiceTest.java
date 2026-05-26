@@ -1,7 +1,9 @@
 package com.taskqueue.services;
 
 import com.taskqueue.exceptions.InvalidTaskException;
+import com.taskqueue.exceptions.QueueFullException;
 import com.taskqueue.exceptions.TaskNotFoundException;
+import com.taskqueue.exceptions.ThreadPoolShutdownException;
 import com.taskqueue.models.Task;
 import com.taskqueue.models.TaskStatus;
 import com.taskqueue.models.TaskType;
@@ -61,6 +63,19 @@ public class TaskServiceTest {
         
         // Verify it was put into the queue
         assertEquals(1, service.getThreadPool().getQueueSize());
+    }
+
+    @Test
+    public void testCreateTaskDoesNotPersistWhenQueueIsFull() {
+        TaskService limitedService = new TaskService(1, 0, mockAiService, mockExecutor);
+
+        Instant deadline = Instant.now().plusSeconds(100);
+
+        assertThrows(QueueFullException.class, () ->
+                limitedService.createTask("Overflow", TaskType.EMAIL, "data", deadline, 5));
+
+        assertTrue(limitedService.getAllTasks().isEmpty());
+        limitedService.shutdown();
     }
 
     @Test
@@ -126,6 +141,34 @@ public class TaskServiceTest {
         assertNotNull(task.getCompletedAt());
         assertEquals("Cancelled by user request.", task.getFailureReason());
         assertEquals(0, service.getThreadPool().getQueueSize());
+    }
+
+    @Test
+    public void testCancelRunningTaskStopsCompletionSideEffects() throws Exception {
+        TaskService realService = new TaskService(1, 10, new AIPrioritizationService(), new TaskExecutor());
+        realService.start();
+
+        Task task = realService.createTask("Slow Task", TaskType.EMAIL, "payload", Instant.now().plusSeconds(100), 5);
+
+        // Wait until the worker has started processing the task.
+        long start = System.currentTimeMillis();
+        while (task.getStatus() != TaskStatus.RUNNING && System.currentTimeMillis() - start < 2000) {
+            Thread.sleep(25);
+        }
+
+        assertEquals(TaskStatus.RUNNING, task.getStatus());
+        realService.cancelTask(task.getTaskId());
+
+        start = System.currentTimeMillis();
+        while (task.getStartedAt() != null && task.getCompletedAt() == null && System.currentTimeMillis() - start < 5000) {
+            Thread.sleep(25);
+        }
+
+        assertEquals(TaskStatus.CANCELLED, task.getStatus());
+        assertNotNull(task.getCompletedAt());
+        assertEquals("Cancelled by user request.", task.getFailureReason());
+
+        realService.shutdown();
     }
 
     @Test

@@ -73,15 +73,19 @@ public class ThreadPool {
     }
 
     /**
+     * Polls for a task with a timeout so workers can drain gracefully during shutdown.
+     */
+    public Task takeTask(long timeoutMillis) throws InterruptedException {
+        return queue.poll(timeoutMillis, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * Initiates a graceful shutdown of the thread pool.
      * Workers are allowed to finish currently executing tasks, but new submissions are rejected.
      */
     public synchronized void shutdown() {
         if (isShutdown.compareAndSet(false, true)) {
             System.out.println("Shutting down ThreadPool...");
-            for (WorkerThread worker : workers) {
-                worker.interrupt();
-            }
         }
     }
 

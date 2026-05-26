@@ -78,6 +78,44 @@ public class ThreadPoolTest {
     }
 
     @Test
+    public void testShutdownDoesNotInterruptRunningTask() throws Exception {
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch finished = new CountDownLatch(1);
+
+        TaskExecutor slowExecutor = new TaskExecutor() {
+            @Override
+            public void execute(Task task) {
+                task.setStartedAt(Instant.now());
+                task.setStatus(com.taskqueue.models.TaskStatus.RUNNING);
+                started.countDown();
+                try {
+                    Thread.sleep(300);
+                    task.setCompletedAt(Instant.now());
+                    task.setStatus(com.taskqueue.models.TaskStatus.COMPLETED);
+                } catch (InterruptedException e) {
+                    task.setCompletedAt(Instant.now());
+                    task.setStatus(com.taskqueue.models.TaskStatus.FAILED);
+                    Thread.currentThread().interrupt();
+                } finally {
+                    finished.countDown();
+                }
+            }
+        };
+
+        ThreadPool pool = new ThreadPool(1, 5, slowExecutor);
+        pool.start();
+
+        Task task = new Task("Shutdown Task", TaskType.EMAIL, "payload", Instant.now().plusSeconds(60), 5);
+        pool.submit(task);
+
+        assertTrue(started.await(2, TimeUnit.SECONDS));
+        pool.shutdown();
+
+        assertTrue(finished.await(2, TimeUnit.SECONDS));
+        assertEquals(com.taskqueue.models.TaskStatus.COMPLETED, task.getStatus());
+    }
+
+    @Test
     public void testWorkerExecution() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger executedCount = new AtomicInteger(0);
@@ -103,6 +141,45 @@ public class ThreadPoolTest {
         assertTrue(completed, "Task should have been processed by worker threads within 3 seconds");
         assertEquals(1, executedCount.get());
 
+        pool.shutdown();
+    }
+
+    @Test
+    public void testWorkersExecuteTasksConcurrently() throws Exception {
+        CountDownLatch bothStarted = new CountDownLatch(2);
+        CountDownLatch releaseWorkers = new CountDownLatch(1);
+        AtomicInteger concurrentExecutions = new AtomicInteger(0);
+        AtomicInteger maxConcurrentExecutions = new AtomicInteger(0);
+
+        TaskExecutor concurrentExecutor = new TaskExecutor() {
+            @Override
+            public void execute(Task task) {
+                int running = concurrentExecutions.incrementAndGet();
+                maxConcurrentExecutions.updateAndGet(current -> Math.max(current, running));
+                bothStarted.countDown();
+                try {
+                    releaseWorkers.await(3, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    concurrentExecutions.decrementAndGet();
+                }
+            }
+        };
+
+        ThreadPool pool = new ThreadPool(2, 5, concurrentExecutor);
+        pool.start();
+
+        Task first = new Task("Concurrent 1", TaskType.EMAIL, "payload-1", Instant.now().plusSeconds(60), 5);
+        Task second = new Task("Concurrent 2", TaskType.PAYMENT, "payload-2", Instant.now().plusSeconds(60), 6);
+
+        pool.submit(first);
+        pool.submit(second);
+
+        assertTrue(bothStarted.await(2, TimeUnit.SECONDS), "Both worker threads should start before release");
+        assertTrue(maxConcurrentExecutions.get() >= 2, "At least two tasks should be executing concurrently");
+
+        releaseWorkers.countDown();
         pool.shutdown();
     }
 }

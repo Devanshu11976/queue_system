@@ -21,10 +21,14 @@ public class WorkerThread extends Thread {
     @Override
     public void run() {
         System.out.println(getName() + " started and listening for tasks...");
-        while (!pool.isShutdown() && !Thread.currentThread().isInterrupted()) {
+        while (true) {
             try {
-                // Blocks until a task is available in the priority queue
-                Task task = pool.takeTask();
+                if (pool.isShutdown() && pool.getQueueSize() == 0) {
+                    break;
+                }
+
+                // Poll with a short timeout so shutdown can drain cleanly without interrupting work.
+                Task task = pool.takeTask(250L);
                 if (task == null) {
                     continue;
                 }
@@ -43,10 +47,8 @@ public class WorkerThread extends Thread {
                 pool.getTaskExecutor().execute(task);
 
             } catch (InterruptedException e) {
-                // Thread interrupted (e.g. during pool shutdown)
-                if (pool.isShutdown()) {
-                    break;
-                }
+                Thread.currentThread().interrupt();
+                break;
             } finally {
                 isWorking.set(false);
                 currentTask = null;
