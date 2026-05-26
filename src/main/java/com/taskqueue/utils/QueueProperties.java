@@ -122,7 +122,7 @@ public final class QueueProperties {
     }
 
     public String getApiKeyPrefix() {
-        return get("api.key.prefix", "sk-ant-");
+        return get("api.key.prefix", "gsk_");
     }
 
     public String getGroqConsoleUrl() {

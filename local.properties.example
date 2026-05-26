@@ -1,2 +1,2 @@
 # Copy to local.properties and set your key (file is gitignored).
-claude.api.key=sk-ant-your-key-here
+groq.api.key=gsk_your_key_here

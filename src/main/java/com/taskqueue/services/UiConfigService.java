@@ -57,7 +57,7 @@ public class UiConfigService {
         form.put("payloadPlaceholder", config.getUi("form.payloadPlaceholder"));
         form.put("apiKeyPlaceholder", config.getUi("form.apiKeyPlaceholder"));
         form.put("apiKeyPrefix", config.getApiKeyPrefix());
-        form.put("anthropicConsoleUrl", config.getGroqConsoleUrl());
+        form.put("groqConsoleUrl", config.getGroqConsoleUrl());
         root.put("form", form);
 
         root.put("labels", buildLabels());
